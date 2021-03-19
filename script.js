@@ -1,20 +1,46 @@
-
 var container = $('.container');
-var arrayForTimes = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"];
+
+getCommentsEntered();
+
+// single source of truth
+//before this, check local storage and json parse for entry data
+var arrayForTimes = [
+    { time: "8am", entry: "" },
+    { time: "9am", entry: "" },
+    { time: "10am", entry: "" },
+    { time: "11am", entry: "" },
+    { time: "12pm", entry: "" },
+    { time: "1pm", entry: "" },
+    { time: "2pm", entry: "" },
+    { time: "3pm", entry: "" },
+    { time: "4pm", entry: "" },
+    { time: "5pm", entry: "" }
+];
+
 var data = []
-//.push will add items to array
 var date = $(`#currentDay`);
 var timeNow = moment()
 var dateNow = timeNow.format('ll');
-var timeColor = moment.duration({hours: 1})
 
 date.text(dateNow);
 
-//if timeNow is between 8 and 9, grab hour div with text matching, add class present, 
-//remove other classes
-//add classes to all different divs with all different text matching
-//or if hour is less than 8, set all div class row to future
-//if hour is 8,
+//.each for each loop jquery
+//use jquery to grab all the rows
+//iterate over array using dot each adding classes
+//use if statement to compare with text content of that row
+//compare text with moment.hour
+//if its less than past, greater than future.
+// $.each('.row'){
+//     if (timeNow.hour < 6) {
+//         .row.addClass('past')
+//     } else if (timeNow.hour > 8) {
+//         .row.addClass('future')
+//     // } else if (timeNow.hour >= 8 && timeNow.hour < 9){
+//     //     .row.addclass('future')
+//     //     .row.children[0].te
+//     // }
+// }
+
 
 if (timeNow.hour(8)){
     $('.row').attr('class', 'future')
@@ -59,46 +85,51 @@ if (timeNow.hour(8)){
     $('.row').text("3pm").attr('class', 'present')
     $('.row').text("4pm").attr('class', 'future')
     $('.row').text("5pm").attr('class', 'future')
-}  else if (timeNow.hour(16)){
+} else if (timeNow.hour(16)){
     $('.row').attr('class', 'past')
     $('.row').text("4pm").attr('class', 'present')
     $('.row').text("5pm").attr('class', 'future')
-}  else if (timeNow.hour(17)){
+} else if (timeNow.hour(17)){
     $('.row').attr('class', 'past')
     $('.row').text("5pm").attr('class', 'present')
 } else {
     $('.row').attr('class', 'past')
 }
 
+//function to get items from local and put them where they should be
+function getCommentsEntered() {
+    var commentsEntered = JSON.parse(localStorage.getItem("data"));
+    //now i need to put them in objects "entry" sections of correct ....
+    console.log(commentsEntered)
 
-
+    //run loop through array and populate entry
+    //CANNOT GET FOR LOOP TO WORK PROPERLY TO POPULATE 
+    //for ( var i = 0; i <= 9; i++ ){
+    //    arrayForTimes[i].entry.text(commentsEntered.entry[i])
+    //}
+}
 
 function saveComment(event) {
     event.preventDefault();
-    console.log(event)
 
-    data.push($('input[name="comments"]'))
-    localStorage.setItem("data", JSON.stringify(data))
-    var commentData = JSON.parse(localStorage.getItem("data"))
-    //populate placeholder using $this
-    $(this).siblings("textarea").attr("placeholder", commentData)
+    const idxOfButton =  $(this).attr("data-idx");
+    var dataEntered = $(this).parents("div").siblings("div.entry").find("textarea").val();
 
-    //localStorage.setItem("data", $(this).siblings("textarea").val())
-    //console.log($(this).siblings("textarea").val())
+    arrayForTimes[idxOfButton].entry = dataEntered;
 
-    //.prop gets property values?
+    localStorage.setItem("data", JSON.stringify(arrayForTimes))
+    commentData = JSON.parse(localStorage.getItem("data"))
 }
 
 
-for ( i = 0; i<=arrayForTimes.length -1; i++ ){
-    var hour = $(`<div class="hour"> ${arrayForTimes[i]}`);
-    var content = $(`<div"><input type="text" class="description" name = "comments"></input></div>`);
-    var saveButton = $(`<div><button type=button class="saveBtn">Save</button></div>`);    
+for ( var i = 0; i <= arrayForTimes.length -1; i++ ){
+    var hour = $(`<div class="hour"> ${arrayForTimes[i.time]}</div>`);
+    var content = $(`<div class="entry"><textarea class="description" name = "comments"></textarea></div>`);
+    var saveButton = $(`<div><button data-idx="${i}" type=button class="saveBtn">Save</button></div>`);    
     var row = $(`<div class="row"></div>`);
     var timeBlock = $('<div class="time-block"></div>');
 
-
-    hour.text(arrayForTimes[i])
+    hour.text(arrayForTimes[i].time)
 
     row.append(hour);
     row.append(content);
@@ -108,4 +139,3 @@ for ( i = 0; i<=arrayForTimes.length -1; i++ ){
 }    
 
 container.on("click", ".saveBtn", saveComment)
-
